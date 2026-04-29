@@ -1,0 +1,343 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+
+local player = Players.LocalPlayer
+local playerName = player.Name
+local displayName = player.DisplayName
+ 
+local gui = Instance.new("ScreenGui")
+gui.Name = "KibaLoader"
+gui.IgnoreGuiInset = true
+gui.ResetOnSpawn = false
+gui.Parent = CoreGui
+
+local background = Instance.new("Frame")
+background.Name = "Background"
+background.Size = UDim2.new(1, 0, 1, 0)
+background.BackgroundColor3 = Color3.fromRGB(5, 2, 20) -- deep space dark
+background.BorderSizePixel = 0
+background.Parent = gui
+
+local vignette = Instance.new("Frame")
+vignette.Size = UDim2.new(1, 0, 1, 0)
+vignette.BackgroundTransparency = 1
+vignette.BorderSizePixel = 0
+vignette.Parent = background
+
+local vignetteGrad = Instance.new("UIGradient")
+vignetteGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0,0,0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,0,0)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0,0,0))
+})
+vignetteGrad.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 1),
+    NumberSequenceKeypoint.new(0.3, 0.7),
+    NumberSequenceKeypoint.new(0.7, 0.7),
+    NumberSequenceKeypoint.new(1, 1)
+})
+vignetteGrad.Rotation = 90
+vignetteGrad.Parent = vignette
+
+for i = 1, 100 do
+    local star = Instance.new("Frame")
+    star.Size = UDim2.new(0, math.random(1, 3), 0, math.random(1, 3))
+    star.Position = UDim2.new(math.random(), 0, math.random(), 0)
+    star.BackgroundColor3 = Color3.new(1, 1, 1)
+    star.BorderSizePixel = 0
+    star.BackgroundTransparency = math.random(20, 80) / 100
+    star.Parent = background
+
+    spawn(function()
+        while star and star.Parent do
+            local twinkle = TweenService:Create(star, TweenInfo.new(
+                math.random(15, 30)/10,
+                Enum.EasingStyle.Linear,
+                Enum.EasingDirection.InOut,
+                -1
+            ), {BackgroundTransparency = math.random(0, 100) / 100})
+            twinkle:Play()
+            twinkle.Completed:Wait()
+        end
+    end)
+end
+
+local galaxyArms = {}
+local armColors = {
+    {Color3.fromRGB(100, 0, 255), Color3.fromRGB(255, 0, 150)},
+    {Color3.fromRGB(0, 50, 200), Color3.fromRGB(0, 255, 200)},
+    {Color3.fromRGB(150, 0, 100), Color3.fromRGB(255, 100, 0)},
+    {Color3.fromRGB(20, 0, 100), Color3.fromRGB(80, 0, 200)},
+}
+
+for idx, colors in ipairs(armColors) do
+    local arm = Instance.new("Frame")
+    arm.Name = "GalaxyArm"..idx
+    arm.AnchorPoint = Vector2.new(0.5, 0.5)
+    arm.Position = UDim2.new(0.5, 0, 0.5, 0)
+    arm.Size = UDim2.new(1.5, 0, 0.3, 0)
+    arm.Rotation = idx * 45
+    arm.BackgroundTransparency = 0.5
+    arm.BorderSizePixel = 0
+    arm.Parent = background
+
+    local armGrad = Instance.new("UIGradient")
+    armGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, colors[1]),
+        ColorSequenceKeypoint.new(0.5, colors[2]),
+        ColorSequenceKeypoint.new(1, colors[1])
+    })
+    armGrad.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.8),
+        NumberSequenceKeypoint.new(0.3, 0.2),
+        NumberSequenceKeypoint.new(0.7, 0.2),
+        NumberSequenceKeypoint.new(1, 0.8)
+    })
+    armGrad.Rotation = 0
+    armGrad.Parent = arm
+
+    table.insert(galaxyArms, arm)
+end
+
+for _, arm in ipairs(galaxyArms) do
+    spawn(function()
+        while arm and arm.Parent do
+            local rotTween = TweenService:Create(arm, TweenInfo.new(
+                10 + math.random()*5, 
+                Enum.EasingStyle.Linear, 
+                Enum.EasingDirection.InOut, 
+                -1
+            ), {Rotation = arm.Rotation + 360})
+            rotTween:Play()
+            rotTween.Completed:Wait()
+        end
+    end)
+    
+    spawn(function()
+        local grad = arm:FindFirstChildOfClass("UIGradient")
+        if not grad then return end
+        while arm and arm.Parent do
+            local offTween = TweenService:Create(grad, TweenInfo.new(
+                6 + math.random()*4, 
+                Enum.EasingStyle.Linear, 
+                Enum.EasingDirection.InOut, 
+                -1
+            ), {Rotation = grad.Rotation + 360})
+            offTween:Play()
+            offTween.Completed:Wait()
+        end
+    end)
+end
+
+local centerFrame = Instance.new("Frame")
+centerFrame.Name = "CenterContent"
+centerFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+centerFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+centerFrame.Size = UDim2.new(0, 350, 0, 260)
+centerFrame.BackgroundTransparency = 1
+centerFrame.BorderSizePixel = 0
+centerFrame.Parent = background
+
+local headshot = Instance.new("ImageLabel")
+headshot.Name = "Headshot"
+headshot.Size = UDim2.new(0, 80, 0, 80)
+headshot.Position = UDim2.new(0.5, -40, 0, 0)
+headshot.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+headshot.BorderSizePixel = 0
+headshot.Parent = centerFrame
+
+local thumbType = Enum.ThumbnailType.HeadShot
+local thumbSize = Enum.ThumbnailSize.Size420x420
+local success, content = pcall(function()
+    return Players:GetUserThumbnailAsync(player.UserId, thumbType, thumbSize)
+end)
+
+if success and content then
+    headshot.Image = content
+end
+
+local headCorner = Instance.new("UICorner")
+headCorner.CornerRadius = UDim.new(1, 0)
+headCorner.Parent = headshot
+
+local headStroke = Instance.new("UIStroke")
+headStroke.Color = Color3.fromRGB(180, 100, 255)
+headStroke.Thickness = 3
+headStroke.Transparency = 0.5
+headStroke.Parent = headshot
+
+local welcomeText = Instance.new("TextLabel")
+welcomeText.Name = "Welcome"
+welcomeText.Size = UDim2.new(1, 0, 0, 36)
+welcomeText.Position = UDim2.new(0, 0, 0, 90)
+welcomeText.BackgroundTransparency = 1
+welcomeText.Font = Enum.Font.GothamBold
+welcomeText.Text = "Welcome to Kiba V5"
+welcomeText.TextColor3 = Color3.new(1, 1, 1)
+welcomeText.TextSize = 24
+welcomeText.TextStrokeTransparency = 0.7
+welcomeText.TextStrokeColor3 = Color3.fromRGB(150, 0, 255)
+welcomeText.Parent = centerFrame
+
+local usernameLabel = Instance.new("TextLabel")
+usernameLabel.Name = "Username"
+usernameLabel.Size = UDim2.new(1, 0, 0, 20)
+usernameLabel.Position = UDim2.new(0, 0, 0, 130)
+usernameLabel.BackgroundTransparency = 1
+usernameLabel.Font = Enum.Font.GothamSemibold
+usernameLabel.Text = "Username: " .. playerName
+usernameLabel.TextColor3 = Color3.fromRGB(200, 180, 255)
+usernameLabel.TextSize = 14
+usernameLabel.Parent = centerFrame
+
+local displayLabel = Instance.new("TextLabel")
+displayLabel.Name = "DisplayName"
+displayLabel.Size = UDim2.new(1, 0, 0, 20)
+displayLabel.Position = UDim2.new(0, 0, 0, 155)
+displayLabel.BackgroundTransparency = 1
+displayLabel.Font = Enum.Font.GothamSemibold
+displayLabel.Text = "Display: " .. displayName
+displayLabel.TextColor3 = Color3.fromRGB(200, 180, 255)
+displayLabel.TextSize = 14
+displayLabel.Parent = centerFrame
+
+local barBackground = Instance.new("Frame")
+barBackground.Name = "BarBg"
+barBackground.Size = UDim2.new(1, 0, 0, 10)
+barBackground.Position = UDim2.new(0, 0, 0, 190)
+barBackground.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+barBackground.BorderSizePixel = 0
+barBackground.Parent = centerFrame
+
+local barCorner = Instance.new("UICorner")
+barCorner.CornerRadius = UDim.new(0.5, 0)
+barCorner.Parent = barBackground
+
+local barFill = Instance.new("Frame")
+barFill.Name = "BarFill"
+barFill.Size = UDim2.new(0, 0, 1, 0)
+barFill.Position = UDim2.new(0, 0, 0, 0)
+barFill.BackgroundColor3 = Color3.fromRGB(110, 50, 250)
+barFill.BorderSizePixel = 0
+barFill.Parent = barBackground
+
+local barFillCorner = Instance.new("UICorner")
+barFillCorner.CornerRadius = UDim.new(0.5, 0)
+barFillCorner.Parent = barFill
+
+local shimmerGrad = Instance.new("UIGradient")
+shimmerGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(130, 50, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 100, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(130, 50, 255))
+})
+shimmerGrad.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0),
+    NumberSequenceKeypoint.new(1, 0.2)
+})
+shimmerGrad.Parent = barFill
+
+spawn(function()
+    while barFill and barFill.Parent do
+        local grad = barFill:FindFirstChildOfClass("UIGradient")
+        if grad then
+            TweenService:Create(grad, TweenInfo.new(
+                1, 
+                Enum.EasingStyle.Linear, 
+                Enum.EasingDirection.InOut, 
+                -1
+            ), {
+                Offset = Vector2.new(1, 0)
+            }):Play()
+        end
+        wait(1)
+    end
+end)
+
+local percentText = Instance.new("TextLabel")
+percentText.Name = "Percent"
+percentText.Size = UDim2.new(1, 0, 0, 20)
+percentText.Position = UDim2.new(0, 0, 0, 210)
+percentText.BackgroundTransparency = 1
+percentText.Font = Enum.Font.GothamBold
+percentText.Text = "0%"
+percentText.TextColor3 = Color3.new(1, 1, 1)
+percentText.TextSize = 14
+percentText.Parent = centerFrame
+
+local soundPart = Instance.new("Part")
+soundPart.Size = Vector3.new(1, 1, 1)
+soundPart.Transparency = 1
+soundPart.CanCollide = false
+soundPart.Anchored = true
+soundPart.Parent = workspace
+
+local music = Instance.new("Sound")
+music.Name = "LoadingMusic"
+music.SoundId = "rbxassetid://1838511607"
+music.Looped = true
+music.Volume = 0.5
+music.Parent = soundPart
+music:Play()
+
+local blackOverlay = Instance.new("Frame")
+blackOverlay.Name = "FadeOverlay"
+blackOverlay.Size = UDim2.new(1, 0, 1, 0)
+blackOverlay.BackgroundColor3 = Color3.new(0, 0, 0)
+blackOverlay.BackgroundTransparency = 0
+blackOverlay.BorderSizePixel = 0
+blackOverlay.ZIndex = 10
+blackOverlay.Parent = gui
+
+local fadeIn = TweenService:Create(blackOverlay, TweenInfo.new(
+    1, 
+    Enum.EasingStyle.Quad, 
+    Enum.EasingDirection.Out
+), {BackgroundTransparency = 1})
+
+fadeIn:Play()
+fadeIn.Completed:Wait()
+blackOverlay:Destroy()
+
+local loadingTime = 4
+local startTime = tick()
+
+while tick() - startTime < loadingTime do
+    local progress = math.min((tick() - startTime) / loadingTime, 1)
+    barFill.Size = UDim2.new(progress, 0, 1, 0)
+    percentText.Text = math.floor(progress * 100) .. "%"
+    RunService.RenderStepped:Wait()
+end
+
+barFill.Size = UDim2.new(1, 0, 1, 0)
+percentText.Text = "100%"
+
+wait(0.5)
+
+local fadeOutOverlay = Instance.new("Frame")
+fadeOutOverlay.Size = UDim2.new(1, 0, 1, 0)
+fadeOutOverlay.BackgroundColor3 = Color3.new(0, 0, 0)
+fadeOutOverlay.BackgroundTransparency = 1
+fadeOutOverlay.BorderSizePixel = 0
+fadeOutOverlay.ZIndex = 10
+fadeOutOverlay.Parent = gui
+
+local fadeOut = TweenService:Create(fadeOutOverlay, TweenInfo.new(
+    0.8, 
+    Enum.EasingStyle.Quad, 
+    Enum.EasingDirection.In
+), {BackgroundTransparency = 0})
+
+fadeOut:Play()
+fadeOut.Completed:Wait()
+
+-- Cleanup
+music:Stop()
+soundPart:Destroy()
+gui:Destroy()
+
+-- Execute Kiba V5
+loadstring(game:HttpGet("https://raw.githubusercontent.com/princejerrondulatre-beep/Kiba-V5/refs/heads/main/Kiba"))()
