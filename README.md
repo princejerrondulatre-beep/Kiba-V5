@@ -1,3 +1,7 @@
+
+
+https://github.com/user-attachments/assets/ac497014-2089-451c-8b58-774128d8fb71
+
 KIBA V5
 
 So I made this dash script. Basically, when you do a certain dash animation (the one with ID 10503381238), it automatically sends you flying toward the closest enemy nearby. No more missing your dashes.
